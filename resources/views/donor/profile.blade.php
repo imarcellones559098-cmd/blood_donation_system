@@ -2,13 +2,6 @@
 
 @section('content')
 <style>
-    * { box-sizing: border-box; }
-
-    .profile-wrapper {
-        max-width: 860px;
-        margin: 0 auto;
-    }
-
     .profile-header {
         background: linear-gradient(135deg, #7a0000 0%, #cc0000 100%);
         border-radius: 20px;
@@ -16,27 +9,19 @@
         display: flex;
         align-items: center;
         gap: 28px;
-        margin-bottom: 28px;
+        margin-bottom: 32px;
         position: relative;
         overflow: hidden;
     }
 
     .profile-header::before {
-        content: '';
-        position: absolute;
-        top: -40px; right: -40px;
-        width: 180px; height: 180px;
-        background: rgba(255,255,255,0.06);
-        border-radius: 50%;
+        content: ''; position: absolute; top: -40px; right: -40px;
+        width: 180px; height: 180px; background: rgba(255,255,255,0.06); border-radius: 50%;
     }
 
     .profile-header::after {
-        content: '';
-        position: absolute;
-        bottom: -60px; right: 60px;
-        width: 240px; height: 240px;
-        background: rgba(255,255,255,0.04);
-        border-radius: 50%;
+        content: ''; position: absolute; bottom: -60px; right: 60px;
+        width: 240px; height: 240px; background: rgba(255,255,255,0.04); border-radius: 50%;
     }
 
     .profile-avatar {
@@ -45,222 +30,53 @@
         border-radius: 50%;
         border: 3px solid rgba(255,255,255,0.4);
         display: flex; align-items: center; justify-content: center;
-        font-size: 32px;
-        font-weight: 800;
-        color: white;
-        flex-shrink: 0;
-        position: relative;
-        z-index: 1;
+        font-size: 32px; font-weight: 800; color: white;
+        flex-shrink: 0; position: relative; z-index: 1;
     }
 
     .profile-header-info { position: relative; z-index: 1; }
+    .profile-header-info h2 { font-size: 24px; font-weight: 800; color: white; margin: 0 0 4px; }
+    .profile-header-info p { font-size: 14px; color: rgba(255,255,255,0.65); margin: 0 0 10px; }
 
-    .profile-header-info h2 {
-        font-size: 24px;
-        font-weight: 800;
-        color: white;
-        margin: 0 0 4px;
-    }
+    .blood-type-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 700; color: white; }
 
-    .profile-header-info p {
-        font-size: 14px;
-        color: rgba(255,255,255,0.65);
-        margin: 0 0 10px;
-    }
+    .profile-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+    .profile-card-header { padding: 24px 32px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; background: #f8f9fb; }
+    .profile-card-header h3 { font-size: 16px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.3px; }
+    .profile-card-header p { font-size: 13px; color: #64748b; margin-top: 4px; }
 
-    .blood-type-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.3);
-        border-radius: 20px;
-        padding: 4px 14px;
-        font-size: 13px;
-        font-weight: 700;
-        color: white;
-    }
+    .edit-badge { background: #fff0f0; color: #cc0000; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1px solid #ffcccc; display: inline-flex; align-items: center; gap: 4px; }
 
-    .profile-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-        overflow: hidden;
-    }
+    .profile-form { padding: 32px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full-width { grid-column: 1 / -1; }
 
-    .profile-card-header {
-        padding: 22px 32px;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+    .form-label { font-size: 13px; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+    .form-label .required { color: #cc0000; font-size: 14px; }
+    .form-label .icon { font-size: 15px; }
 
-    .profile-card-header h3 {
-        font-size: 16px;
-        font-weight: 700;
-        color: #1a1a1a;
-    }
+    .form-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; font-size: 14px; color: #1e293b; background: white; transition: all 0.2s; outline: none; font-family: 'Inter', sans-serif; font-weight: 500; }
+    .form-input:focus { border-color: #cc0000; box-shadow: 0 0 0 3px rgba(204,0,0,0.1); }
+    .form-input:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
 
-    .profile-card-header p {
-        font-size: 13px;
-        color: #888;
-        margin-top: 2px;
-    }
+    .form-input select, select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
+    textarea.form-input { resize: vertical; min-height: 100px; }
 
-    .edit-badge {
-        background: #fff0f0;
-        color: #cc0000;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 4px 12px;
-        border-radius: 20px;
-        border: 1px solid #ffd0d0;
-    }
+    .form-divider { border: none; border-top: 1px solid #f1f5f9; margin: 12px 0 32px; }
+    .section-label { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: #f1f5f9; }
 
-    .profile-form {
-        padding: 32px;
-    }
+    .form-footer { display: flex; align-items: center; justify-content: space-between; padding: 24px 32px; background: #f8f9fb; border-top: 1px solid #f1f5f9; }
+    .form-footer p { font-size: 13px; color: #64748b; font-weight: 500; }
 
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
+    .save-btn { background: linear-gradient(135deg, #7a0000, #cc0000); color: white; border: none; padding: 12px 32px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; box-shadow: 0 4px 10px rgba(204,0,0,0.2); }
+    .save-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(204,0,0,0.3); }
 
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 7px;
-    }
-
-    .form-group.full-width {
-        grid-column: 1 / -1;
-    }
-
-    .form-label {
-        font-size: 12px;
-        font-weight: 700;
-        color: #555;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .form-label .required {
-        color: #cc0000;
-        font-size: 14px;
-    }
-
-    .form-label .icon { font-size: 14px; }
-
-    .form-input {
-        width: 100%;
-        border: 1.5px solid #e8e8e8;
-        border-radius: 10px;
-        padding: 11px 14px;
-        font-size: 14px;
-        color: #1a1a1a;
-        background: white;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        outline: none;
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    .form-input:focus {
-        border-color: #cc0000;
-        box-shadow: 0 0 0 3px rgba(204,0,0,0.08);
-    }
-
-    .form-input:disabled {
-        background: #fafafa;
-        color: #999;
-        cursor: not-allowed;
-        border-color: #f0f0f0;
-    }
-
-    .form-input select, select.form-input {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 14px center;
-        padding-right: 36px;
-    }
-
-    textarea.form-input { resize: vertical; min-height: 80px; }
-
-    .form-divider {
-        border: none;
-        border-top: 1px solid #f0f0f0;
-        margin: 8px 0 24px;
-    }
-
-    .section-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: #bbb;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .section-label::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: #f0f0f0;
-    }
-
-    .form-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 20px 32px;
-        background: #fafafa;
-        border-top: 1px solid #f0f0f0;
-        border-radius: 0 0 20px 20px;
-    }
-
-    .form-footer p {
-        font-size: 12px;
-        color: #aaa;
-    }
-
-    .save-btn {
-        background: linear-gradient(135deg, #7a0000, #cc0000);
-        color: white;
-        border: none;
-        padding: 12px 32px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    .save-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(122,0,0,0.35);
-    }
-
-    .error-msg {
-        font-size: 11px;
-        color: #cc0000;
-        margin-top: 2px;
-    }
+    .error-msg { font-size: 12px; color: #dc2626; margin-top: 4px; font-weight: 500; }
 </style>
 
-<div class="profile-wrapper">
+<div class="page-wrapper">
 
     {{-- Profile Header Banner --}}
     <div class="profile-header">

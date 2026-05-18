@@ -22,3 +22,10 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# ── Docker & Render — DO commit these ────────────────────────────────────────
+!Dockerfile
+!.dockerignore
+!docker/
+!render.yaml
+!.env.render

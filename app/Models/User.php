@@ -44,4 +44,8 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+    public function bloodRequests()
+    {
+    return $this->hasMany(BloodRequest::class);
+    }
 }

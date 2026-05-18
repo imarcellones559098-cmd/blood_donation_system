@@ -8,14 +8,15 @@ use App\Models\DonorProfile;
 
 class DonorController extends Controller
 {
-    public function dashboard()
-{
-    $donations = auth()->user()->donations()->latest()->get();
-    $profile   = auth()->user()->donorProfile; // adjust to your actual relationship name
+   public function dashboard()
+    {
+        $donations = auth()->user()->donations()->latest()->get();
+        $profile   = auth()->user()->donorProfile;
+        $pending   = $donations->where('status', 'pending')->count();
+        $approved  = $donations->where('status', 'approved')->count();
 
-    return view('donor.dashboard', compact('donations', 'profile'));
-}
-
+        return view('donor.dashboard', compact('donations', 'profile', 'pending', 'approved'));
+    }
     public function create()
     {
         return view('donor.donate');

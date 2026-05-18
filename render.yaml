@@ -1,0 +1,72 @@
+services:
+  # ── Web Service (Laravel App) ──────────────────────────────────────────────
+  - type: web
+    name: blood-donation-system
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # Render auto-detects the exposed port; we use 10000 in nginx.conf
+    port: 10000
+    plan: free            # change to "starter" or "standard" for production
+    region: oregon        # options: oregon, frankfurt, singapore, ohio, virginia
+
+    envVars:
+      - key: APP_NAME
+        value: "Blood Donation System"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        # Render sets RENDER_EXTERNAL_URL automatically — override after first deploy
+        fromService:
+          type: web
+          name: blood-donation-system
+          property: host
+      - key: APP_KEY
+        generateValue: true     # Render generates a random value on first deploy
+
+      # ── Database (Render MySQL or external) ───────────────────────────────
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: blood-donation-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: blood-donation-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: blood-donation-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: blood-donation-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: blood-donation-db
+          property: password
+
+      # ── Session / Cache / Queue (file-based for free tier) ────────────────
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+
+      # ── Logging ───────────────────────────────────────────────────────────
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+
+  # ── MySQL Database ─────────────────────────────────────────────────────────
+databases:
+  - name: blood-donation-db
+    databaseName: blood_management_db
+    plan: free             # free tier: 1GB storage, 97 day expiry
+    region: oregon         # must match the web service region
