@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +13,13 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        if (!User::where('email', 'admin@blood.com')->exists()) {
-            User::factory()->create([
-                'email' => 'admin@blood.com',
-                'password' => bcrypt('admin123'),
-            ]);
-        }
+        User::updateOrCreate(
+            ['email' => 'admin@blood.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
     }
 }
