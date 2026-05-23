@@ -1,92 +1,95 @@
-# =============================================================================
-# Stage 1: Node.js — Build frontend assets (Vite + Tailwind)
-# =============================================================================
-FROM node:20-alpine AS node-builder
+FROM php:8.4-apache
 
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
-
-COPY resources/ ./resources/
-COPY vite.config.js tailwind.config.js postcss.config.js ./
-COPY public/ ./public/
-
-RUN npm run build
-
-# =============================================================================
-# Stage 2: PHP — Install Composer dependencies
-# =============================================================================
-FROM composer:2.7 AS composer-builder
-
-WORKDIR /app
-
-COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
-    --optimize-autoloader \
-    --no-interaction \
-    --no-scripts \
-    --prefer-dist
-
-COPY . .
-RUN composer dump-autoload --optimize --no-dev
-
-# =============================================================================
-# Stage 3: Final Production Image
-# =============================================================================
-FROM php:8.2-fpm-alpine AS production
-
-# Install system dependencies
-RUN apk add --no-cache \
-    nginx \
-    supervisor \
-    curl \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libzip-dev \
-    zip \
+# Install system packages and PHP extensions
+RUN apt-get update && apt-get install -y \
+    git \
     unzip \
-    oniguruma-dev \
-    mysql-client \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    curl \
+    libpq-dev \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpng-dev \
+    zip \
     && docker-php-ext-install \
         pdo \
         pdo_mysql \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
+        pdo_pgsql \
         zip \
-    && rm -rf /var/cache/apk/*
+        mbstring \
+        xml \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable Apache rewrite
+RUN a2enmod rewrite
+
+# Make Apache use port 10000 (Render default)
+RUN sed -i 's/Listen 80/Listen 10000/g' /etc/apache2/ports.conf \
+    && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:10000>/g' \
+    /etc/apache2/sites-available/000-default.conf
+
+# Set Laravel public as document root
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' \
+    /etc/apache2/sites-available/000-default.conf \
+    && sed -i 's|/var/www/html|/var/www/html/public|g' \
+    /etc/apache2/apache2.conf
+
+# Allow .htaccess for Laravel
+RUN printf '<Directory /var/www/html/public>\n\
+AllowOverride All\n\
+Require all granted\n\
+</Directory>\n' > /etc/apache2/conf-available/laravel.conf \
+    && a2enconf laravel
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy vendor from composer stage
-COPY --from=composer-builder /app/vendor ./vendor
-
-# Copy built frontend assets from node stage
-COPY --from=node-builder /app/public/build ./public/build
-
-# Copy application source
+# Copy Laravel app
 COPY . .
 
-# Copy config files
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/supervisord.conf /etc/supervisord.conf
-COPY docker/php.ini /usr/local/etc/php/conf.d/laravel.ini
-COPY docker/start.sh /usr/local/bin/start.sh
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Set permissions
-RUN chmod +x /usr/local/bin/start.sh \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Install frontend dependencies and build assets
+RUN npm install && npm run build
 
-# Expose port (Render uses 10000 by default, but we use 80 via nginx)
+# Clear Laravel caches
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
+
+# Create storage symlink
+RUN php artisan storage:link || true
+
+# Fix permissions
+RUN mkdir -p \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache \
+    public/uploads \
+    && chown -R www-data:www-data \
+        storage \
+        bootstrap/cache \
+        public/uploads \
+    && chmod -R 775 \
+        storage \
+        bootstrap/cache \
+        public/uploads
+
+# (Optional) Run migrations
+RUN php artisan migrate --force || true
+
+# Expose port
 EXPOSE 10000
 
-CMD ["/usr/local/bin/start.sh"]
+# Start Apache
+CMD ["apache2-foreground"]
