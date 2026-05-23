@@ -23,9 +23,29 @@ class RegistrationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'role' => 'donor',
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('donor.dashboard', absolute: false));
+    }
+
+    public function test_admin_registration_requires_passcode(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Admin User',
+            'email' => 'admin2@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'role' => 'admin',
+            'admin_passcode' => 'ianray',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('admin.dashboard', absolute: false));
+        $this->assertDatabaseHas('users', [
+            'email' => 'admin2@example.com',
+            'role' => 'admin',
+        ]);
     }
 }

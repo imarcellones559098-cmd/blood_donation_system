@@ -157,7 +157,7 @@
             </div>
             <form method="POST" action="<?php echo e(route('logout')); ?>">
                 <?php echo csrf_field(); ?>
-                <button type="s ubmit" class="btn-signout">⏻ Sign Out</button>
+                <button type="submit" class="btn-signout">⏻ Sign Out</button>
             </form>
         </div>
     </aside>

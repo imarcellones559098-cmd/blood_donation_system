@@ -34,16 +34,27 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string', 'in:donor,admin'],
+            'admin_passcode' => ['nullable', 'string', 'required_if:role,admin'],
         ]);
 
+        if ($request->role === 'admin' && $request->admin_passcode !== 'ianray') {
+            throw ValidationException::withMessages([
+                'admin_passcode' => __('The admin passcode is invalid.'),
+            ]);
+        }
+
+        $role = $request->role === 'admin' ? 'admin' : 'donor';
+
         $user = User::create([
-    'name' => $request->name,
-    'email' => $request->email,
-    'password' => Hash::make($request->password),
-    'role' => 'donor',
-]);
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $role,
+        ]);
+
         Auth::login($user);
 
-        return redirect()->route('donor.dashboard');
+        return redirect()->route($role === 'admin' ? 'admin.dashboard' : 'donor.dashboard');
     }
 }

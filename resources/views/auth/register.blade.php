@@ -39,6 +39,27 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <!-- Role -->
+        <div class="mt-4">
+            <x-input-label for="role" :value="__('Register as')" />
+            <select id="role" name="role" class="block mt-1 w-full" required>
+                <option value="donor" {{ old('role') === 'donor' ? 'selected' : '' }}>{{ __('Blood Donor') }}</option>
+                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
+            </select>
+            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+        </div>
+
+        <!-- Admin Passcode -->
+        <div class="mt-4">
+            <x-input-label for="admin_passcode" :value="__('Admin Passcode')" />
+            <x-text-input id="admin_passcode" class="block mt-1 w-full"
+                            type="password"
+                            name="admin_passcode"
+                            autocomplete="off" />
+            <p class="text-sm text-gray-500 mt-1">{{ __('Enter the admin passcode only when registering an admin account.') }}</p>
+            <x-input-error :messages="$errors->get('admin_passcode')" class="mt-2" />
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}

@@ -17,9 +17,9 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-             'email' => 'admin@blood.com',
-    'password' => bcrypt('password'),
+        $this->call([
+            AdminSeeder::class,
+            DonorSeeder::class,
         ]);
     }
 }
