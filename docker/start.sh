@@ -34,6 +34,10 @@ php artisan view:cache
 echo "[INFO] Running database migrations..."
 php artisan migrate --force
 
+# — Run database seeders ————————————————————————
+echo "[INFO] Running database seeders..."
+php artisan db:seed --force
+
 # ── Create storage symlink ────────────────────────────────────────────────────
 echo "[INFO] Creating storage symlink..."
 php artisan storage:link || true
